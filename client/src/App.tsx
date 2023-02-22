@@ -1,45 +1,40 @@
-import { useEffect, useState } from "react";
+import { Routes, Route } from "react-router-dom";
+import { createContext, useEffect, useState } from "react";
 import { GlobalStyles, StyledContainer } from "./styles";
+import { ThemeProvider } from "styled-components";
+import { Home } from "./pages";
 import { connect } from "socket.io-client";
+import theme from "./styles/theme";
+
+export const SocketIoContext = createContext(null);
 
 function App() {
-  const [messages, setMessages] = useState<string[]>([]);
   const [io, setIo] = useState<any>(null);
+  const [room, setRoom] = useState("");
 
+  // establish connection to the server
   useEffect(() => {
-    setIo(connect("http://localhost:8000"));
+    setIo(
+      connect(
+        process.env.NODE_ENV === "production" ? "" : "http://localhost:8000"
+      )
+    );
   }, []);
 
-  const handleOnSubmit = (e: any) => {
-    e.preventDefault();
-
-    const input = e.target.input;
-    setMessages([...messages, input.value]);
-  };
-
   return (
-    <div>
-      <GlobalStyles />
-      <StyledContainer>
-        <div className="messages">
-          {messages.map((message, index) => (
-            <p
-              key={index}
-              style={{
-                background: index % 2 ? "darkgrey" : "transparent",
-                color: index % 2 ? "black" : "inherit",
-              }}
-            >
-              {message}
-            </p>
-          ))}
-        </div>
-        <form onSubmit={handleOnSubmit}>
-          <input type="text" name="input" placeholder="Write message" />
-          <button>🚀</button>
-        </form>
-      </StyledContainer>
-    </div>
+    <ThemeProvider theme={theme}>
+      <SocketIoContext.Provider value={io}>
+        <GlobalStyles />
+        <StyledContainer>
+          <div className="inner">
+            <h1>tic tac toe</h1>
+            <Routes>
+              <Route path="/" element={<Home />} />
+            </Routes>
+          </div>
+        </StyledContainer>
+      </SocketIoContext.Provider>
+    </ThemeProvider>
   );
 }
 

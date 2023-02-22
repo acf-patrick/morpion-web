@@ -1,14 +1,19 @@
 import { createGlobalStyle } from "styled-components";
 
 const GlobalStyles = createGlobalStyle`
+  @font-face {
+    font-family: GT;
+    src: url("/fonts/GTWalsheimPro-Regular.ttf");
+  }
+
   :root {
-    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-family: GT, system-ui, Avenir, Helvetica, Arial, sans-serif;
     line-height: 1.5;
     font-weight: 400;
 
     color-scheme: light dark;
     color: rgba(255, 255, 255, 0.87);
-    background-color: #242424;
+    background-color: #001535;
 
     font-synthesis: none;
     text-rendering: optimizeLegibility;

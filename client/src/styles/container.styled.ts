@@ -1,32 +1,26 @@
 import styled from "styled-components";
 
 const StyledContainer = styled.div`
-  width: 480px;
-  height: 640px;
-  margin: auto;
+  height: 100dvh;
   display: flex;
-  flex-direction: column;
-  padding-top: 2rem;
-  gap: 1rem;
+  align-items: center;
+  justify-content: center;
 
-  .messages {
+  .inner {
+    max-width: ${({ theme }) => theme.sizes.maxWidth};
+    max-height: ${({ theme }) => theme.sizes.maxHeight};
     flex-grow: 1;
-    border: 1px solid white;
 
-    p {
-      padding: 0.25rem;
-      overflow-wrap: break-word;
-    }
+    border-radius: 5px;
+    background-color: ${({ theme }) => theme.colors.background};
   }
 
-  form {
-    display: flex;
-    gap: 0.5rem;
-
-    input {
-      flex-grow: 1;
-      padding: 0.5rem;
-    }
+  h1 {
+    margin-top: 0;
+    text-align: center;
+    padding: 2rem 0;
+    text-transform: capitalize;
+    font-weight: bold;
   }
 `;
 
