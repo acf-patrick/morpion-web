@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "client": "cd client && yarn dev",
+    "server": "cd server && yarn dev",
+    "clientInstall": "cd client && yarn",
+    "serverInstall": "cd server && yarn",
+    "preinstall": "yarn clientInstall && yarn serverInstall",
+    "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\""
+  },
+  "devDependencies": {
+    "concurrently": "^7.6.0"
+  }
+}
