@@ -1,34 +1,46 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.css'
+import { useEffect, useState } from "react";
+import { GlobalStyles, StyledContainer } from "./styles";
+import { connect } from "socket.io-client";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [messages, setMessages] = useState<string[]>([]);
+  const [io, setIo] = useState<any>(null);
+
+  useEffect(() => {
+    setIo(connect("http://localhost:8000"));
+  }, []);
+
+  const handleOnSubmit = (e: any) => {
+    e.preventDefault();
+
+    const input = e.target.input;
+    setMessages([...messages, input.value]);
+  };
 
   return (
-    <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+    <div>
+      <GlobalStyles />
+      <StyledContainer>
+        <div className="messages">
+          {messages.map((message, index) => (
+            <p
+              key={index}
+              style={{
+                background: index % 2 ? "darkgrey" : "transparent",
+                color: index % 2 ? "black" : "inherit",
+              }}
+            >
+              {message}
+            </p>
+          ))}
+        </div>
+        <form onSubmit={handleOnSubmit}>
+          <input type="text" name="input" placeholder="Write message" />
+          <button>🚀</button>
+        </form>
+      </StyledContainer>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
