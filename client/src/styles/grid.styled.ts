@@ -5,7 +5,7 @@ const StyledGrid = styled.div`
   grid-template-columns: repeat(3, 1fr);
   max-width: 280px;
   aspect-ratio: 1;
-  margin: 0 auto;
+  margin: 1rem auto;
 
   div {
     display: flex;
@@ -13,28 +13,33 @@ const StyledGrid = styled.div`
     justify-content: center;
   }
 
+  svg {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
   ._0 {
-    border-bottom: 1px solid ${({ theme }) => theme.colors.line};
-    border-right: 1px solid ${({ theme }) => theme.colors.line};
+    border-bottom: ${({theme}) => theme.border} solid ${({ theme }) => theme.colors.line};
+    border-right: ${({theme}) => theme.border} solid ${({ theme }) => theme.colors.line};
   }
   
   ._2 {
-    border-bottom: 1px solid ${({ theme }) => theme.colors.line};
-    border-left: 1px solid ${({ theme }) => theme.colors.line};
+    border-bottom: ${({theme}) => theme.border} solid ${({ theme }) => theme.colors.line};
+    border-left: ${({theme}) => theme.border} solid ${({ theme }) => theme.colors.line};
   }
   
   ._4 {
-    box-shadow: 0 0 0 1px ${({ theme }) => theme.colors.line};
+    box-shadow: 0 0 0 ${({theme}) => theme.border} ${({ theme }) => theme.colors.line};
   }
   
   ._6 {
-    border-top: 1px solid ${({ theme }) => theme.colors.line};
-    border-right: 1px solid ${({ theme }) => theme.colors.line};
+    border-top: ${({theme}) => theme.border} solid ${({ theme }) => theme.colors.line};
+    border-right: ${({theme}) => theme.border} solid ${({ theme }) => theme.colors.line};
   }
   
   ._8 {
-    border-top: 1px solid ${({ theme }) => theme.colors.line};
-    border-left: 1px solid ${({ theme }) => theme.colors.line};
+    border-top: ${({theme}) => theme.border} solid ${({ theme }) => theme.colors.line};
+    border-left: ${({theme}) => theme.border} solid ${({ theme }) => theme.colors.line};
   }
 `;
 

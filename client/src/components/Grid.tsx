@@ -2,7 +2,12 @@ import { StyledGrid } from "../styles";
 import { BsCircle } from "react-icons/bs";
 import { RxCross1 } from "react-icons/rx";
 
-function Grid({ cells }: { cells: string[][] }) {
+interface IGridProps {
+  handleCellOnClick: Function;
+  cells: string[][];
+}
+
+function Grid({ cells, handleCellOnClick }: IGridProps) {
   const divs: string[] = [];
   cells.forEach((row) =>
     row.forEach((cell) => {
@@ -13,7 +18,13 @@ function Grid({ cells }: { cells: string[][] }) {
   return (
     <StyledGrid>
       {divs.map((cell, i) => (
-        <div key={i} className={`_${i}`}>
+        <div
+          key={i}
+          className={`_${i}`}
+          onClick={() => {
+            handleCellOnClick(i);
+          }}
+        >
           {cell === "o" ? <BsCircle /> : cell === "x" ? <RxCross1 /> : <></>}
         </div>
       ))}

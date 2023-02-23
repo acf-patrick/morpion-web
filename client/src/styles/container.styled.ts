@@ -18,15 +18,30 @@ const StyledContainer = styled.div`
     max-width: ${({ theme }) => theme.sizes.maxWidth};
     max-height: ${({ theme }) => theme.sizes.maxHeight};
     flex-grow: 1;
+    padding-bottom: 2rem;
 
     border-radius: 5px;
     background-color: ${({ theme }) => theme.colors.background};
   }
 
+  form {
+    display: flex;
+    gap: 0.5rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 0 0.5rem;
+  }
+
+  input {
+    min-width: 75%;
+    padding: 0.5rem;
+  }
+
   h1 {
     display: flex;
     flex-direction: column;
-    margin-top: 0;
+    margin: 0;
     text-align: center;
     padding: 2rem 0;
     text-transform: capitalize;
