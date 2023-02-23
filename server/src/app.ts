@@ -19,8 +19,39 @@ const io = new Server(server, {
 
 app.use(cors());
 
+// Game turn
+let turn: "x" | "o" = "o";
+
+interface Room {
+  name: string;
+  users: string[];
+}
+const rooms: Room[] = [];
+
 io.on("connection", (socket) => {
-  console.log(`${socket.id} connected`);
+  const id = socket.id;
+  console.log(`${id} connected`);
+
+  socket.on("new game", (name: string) => {
+    socket.join(name);
+
+    let found = false;
+    rooms.forEach((room) => {
+      if (room.name === name) {
+        found = true;
+        if (room.users.length >= 2) socket.emit("room full");
+        else room.users.push(id);
+      }
+    });
+
+    if (!found)
+      rooms.push({
+        name: name,
+        users: [id],
+      });
+
+    console.log(rooms);
+  });
 });
 
 app.get("/", (req, res) => {

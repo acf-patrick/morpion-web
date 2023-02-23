@@ -8,11 +8,26 @@ const expand = keyframes`
   }
 `;
 
+const appear = keyframes`
+  from {
+    transform: translateY(-15px);
+    opacity: 0;
+  } to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+`;
+
 const StyledContainer = styled.div`
   height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  animation: ${appear} 0.75s linear both;
+
+  @media (max-width: 768px) {
+    background-color: ${({ theme }) => theme.colors.background};
+  }
 
   .inner {
     max-width: ${({ theme }) => theme.sizes.maxWidth};
@@ -24,9 +39,15 @@ const StyledContainer = styled.div`
     background-color: ${({ theme }) => theme.colors.background};
   }
 
+  .quit {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+  }
+
   form {
     display: flex;
-    gap: 0.5rem;
+    gap: 1rem;
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -56,7 +77,7 @@ const StyledContainer = styled.div`
       margin: 0 auto;
       background-color: white;
       bottom: 0;
-      animation: ${expand} 1s 500ms both;
+      animation: ${expand} 1s 1s both;
     }
   }
 `;

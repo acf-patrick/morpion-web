@@ -1,5 +1,4 @@
-import { Routes, Route } from "react-router-dom";
-import { createContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { GlobalStyles, StyledContainer } from "./styles";
 import { ThemeProvider } from "styled-components";
 import { Grid } from "./components";
@@ -7,14 +6,19 @@ import { connect } from "socket.io-client";
 import { StyledButton } from "./styles";
 import theme from "./styles/theme";
 
-export const SocketIoContext = createContext(null);
-
 function App() {
   // Socket.io connection handler
   const [io, setIo] = useState<any>(null);
 
-  // establish connection to the server
+  // Game room
+  const [room, setRoom] = useState("");
+
   useEffect(() => {
+    // Check for existing room
+    const value = sessionStorage.getItem("room");
+    if (value) setRoom(value);
+
+    // establish connection to the server
     setIo(
       connect(
         process.env.NODE_ENV === "production" ? "" : "http://localhost:8000"
@@ -29,37 +33,67 @@ function App() {
     ["", "", ""],
   ]);
 
-  // Game room
-  const [room, setRoom] = useState("");
-
   const handleCellOnClick = (cellIndex: number) => {
+    if (!room) return;
     const [i, j] = [Math.floor(cellIndex / 3), cellIndex % 3];
-    grid[i][j] = "x";
+
     setGrid([...grid]);
   };
 
-  const newGame = (e: any) => {
-    e.preventDefault();
-    const input = e.target.room;
-    setRoom(input.value);
-    sessionStorage.setItem("room", room);
+  const newGame = (newRoom: string) => {
+    let joined = true;
+    io.emit("new game", newRoom).on("room full", () => {
+      alert("Seems that you'll have to join another game. 😕");
+      joined = false;
+    });
+
+    if (joined) {
+      setRoom(newRoom);
+      sessionStorage.setItem("room", newRoom);
+    }
+  };
+
+  const quitGame = () => {
+    if (confirm("Are you sure ?")) {
+      sessionStorage.removeItem("room");
+      setRoom("");
+      setGrid([
+        ["", "", ""],
+        ["", "", ""],
+        ["", "", ""],
+      ]);
+    }
   };
 
   return (
     <ThemeProvider theme={theme}>
-      <SocketIoContext.Provider value={io}>
-        <GlobalStyles />
-        <StyledContainer>
-          <div className="inner">
-            <h1>tic tac toe</h1>
-            <Grid cells={grid} handleCellOnClick={handleCellOnClick} />
-            <form onSubmit={newGame}>
-              <input type="text" placeholder="Enter room name to join" name="room" />
-              {room ? <></> : <StyledButton type="submit">new game</StyledButton>}
+      <GlobalStyles />
+      <StyledContainer>
+        <div className="inner">
+          <h1>tic tac toe</h1>
+          <Grid cells={grid} handleCellOnClick={handleCellOnClick} />
+          {room ? (
+            <div className="quit">
+              <StyledButton onClick={quitGame}>quit game</StyledButton>
+            </div>
+          ) : (
+            <form
+              onSubmit={(e: any) => {
+                e.preventDefault();
+                newGame(e.target.room.value);
+              }}
+            >
+              <input
+                type="text"
+                placeholder="Enter room name to join"
+                name="room"
+                required
+              />
+              <StyledButton type="submit">new game</StyledButton>
             </form>
-          </div>
-        </StyledContainer>
-      </SocketIoContext.Provider>
+          )}
+        </div>
+      </StyledContainer>
     </ThemeProvider>
   );
 }
