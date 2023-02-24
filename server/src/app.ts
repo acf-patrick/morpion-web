@@ -26,7 +26,7 @@ interface Room {
   name: string;
   users: string[];
 }
-const rooms: Room[] = [];
+let rooms: Room[] = [];
 
 io.on("connection", (socket) => {
   const id = socket.id;
@@ -50,6 +50,13 @@ io.on("connection", (socket) => {
         users: [id],
       });
 
+    console.log(rooms);
+  });
+
+  socket.on("quit game", () => {
+    rooms.forEach((room) => {
+      room.users = room.users.filter((user) => user !== id);
+    });
     console.log(rooms);
   });
 });

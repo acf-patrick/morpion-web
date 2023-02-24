@@ -55,6 +55,7 @@ function App() {
 
   const quitGame = () => {
     if (confirm("Are you sure ?")) {
+      io.emit("quit game");
       sessionStorage.removeItem("room");
       setRoom("");
       setGrid([
