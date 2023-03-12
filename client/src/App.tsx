@@ -45,7 +45,9 @@ function App() {
     // establish connection to the server
     setIo(
       connect(
-        process.env.NODE_ENV === "production" ? "https://morpion-epc0.onrender.com" : "http://localhost:8000"
+        process.env.NODE_ENV === "production"
+          ? "https://morpion-epc0.onrender.com"
+          : "http://localhost:8000"
       )
     );
   }, []);
@@ -137,7 +139,7 @@ function App() {
             >
               <input
                 type="text"
-                placeholder="Enter room name to join"
+                placeholder="Enter 'solo' to play solo"
                 name="room"
                 required
               />

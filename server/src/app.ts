@@ -1,7 +1,9 @@
+import { isFull, getWinner, getRandomRoom } from "./utils";
 import { Server } from "socket.io";
 import express from "express";
 import http from "http";
 import cors from "cors";
+import { getOptimalMove } from "./ai";
 
 const PORT = process.env.PORT || 8000;
 
@@ -16,7 +18,7 @@ const io = new Server(server, {
 app.use(cors());
 
 interface User {
-  id: string;
+  id: string; // Empty string means AI
   pawn: "x" | "o";
 }
 
@@ -28,35 +30,14 @@ interface Room {
 }
 let rooms: Room[] = [];
 
-function isFull(grid: string[][]) {
-  for (let row of grid) for (let col of row) if (!col) return false;
-  return true;
-}
-
-function getWinner(grid: string[][]) {
-  // Checking rows
-  for (let row of grid) {
-    if (row[0] === row[1] && row[1] === row[2]) return row[0];
-  }
-
-  // Checking columns
-  for (let i = 0; i < 3; ++i) {
-    if (grid[0][i] === grid[1][i] && grid[1][i] === grid[2][i])
-      return grid[0][i];
-  }
-
-  // Checking diagonals
-  if (grid[0][0] === grid[1][1] && grid[1][1] === grid[2][2]) return grid[1][1];
-  if (grid[2][0] === grid[1][1] && grid[1][1] === grid[0][2]) return grid[1][1];
-
-  return "";
-}
-
 io.on("connection", (socket) => {
   const id = socket.id;
   console.log(`${id} connected`);
 
   socket.on("join game", (name: string) => {
+    const solo = name === "solo";
+    if (solo) name = getRandomRoom();
+
     const index = rooms.findIndex((room) => room.name === name);
     let roomFull = false;
     let grid: string[][] = null;
@@ -92,6 +73,14 @@ io.on("connection", (socket) => {
       success: !roomFull,
       grid: grid,
     });
+
+    if (solo) {
+      const room = rooms[rooms.length - 1];
+      room.users.push({
+        id: "",
+        pawn: "x",
+      });
+    }
 
     console.log(rooms);
   });
@@ -148,6 +137,17 @@ io.on("connection", (socket) => {
             io.to(room.name).emit("grid update", room.grid);
 
             console.log(room);
+          }
+        }
+
+        const opponent = room.users[(index + 1) % 2];
+        if (!opponent.id) {
+          // AI moves
+          const coordinates = getOptimalMove(room.grid);
+          if (coordinates[0] >= 0 && coordinates[1] >= 0) {
+            room.grid[coordinates[0]][coordinates[1]] = "x";
+            room.hand = room.hand === "x" ? "o" : "x";
+            io.to(room.name).emit("grid update", room.grid);
           }
         }
 
