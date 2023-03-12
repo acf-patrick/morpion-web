@@ -4,7 +4,6 @@ import http from "http";
 import cors from "cors";
 
 const PORT = process.env.PORT || 8000;
-const FRONTEND_URI = process.env.FRONTENT_URI;
 
 const app = express();
 const server = http.createServer(app);

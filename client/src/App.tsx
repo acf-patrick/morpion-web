@@ -45,7 +45,7 @@ function App() {
     // establish connection to the server
     setIo(
       connect(
-        process.env.NODE_ENV === "production" ? "" : "http://localhost:8000"
+        process.env.NODE_ENV === "production" ? "https://morpion-epc0.onrender.com" : "http://localhost:8000"
       )
     );
   }, []);
