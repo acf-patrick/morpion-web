@@ -2,16 +2,23 @@ import { useEffect, useState } from "react";
 import { GlobalStyles, StyledContainer } from "./styles";
 import { ThemeProvider } from "styled-components";
 import { Grid } from "./components";
-import { connect } from "socket.io-client";
+import { Socket, connect } from "socket.io-client";
 import { StyledButton } from "./styles";
 import theme from "./styles/theme";
 
 function App() {
   // Socket.io connection handler
-  const [io, setIo] = useState<any>(null);
+  const [io, setIo] = useState<Socket | null>(null);
 
   // Game room
   const [room, setRoom] = useState("");
+
+  // Main game grid
+  const [grid, setGrid] = useState<string[][]>([
+    ["", "", ""],
+    ["", "", ""],
+    ["", "", ""],
+  ]);
 
   useEffect(() => {
     // Check for existing room
@@ -26,36 +33,56 @@ function App() {
     );
   }, []);
 
-  // Main game grid
-  const [grid, setGrid] = useState<string[][]>([
-    ["", "", ""],
-    ["", "", ""],
-    ["", "", ""],
-  ]);
+  useEffect(() => {
+    io?.on(
+      "join response",
+      (response: { room: string; success: boolean; grid?: string[][] }) => {
+        if (response.success) {
+          if (response.grid) setGrid(response.grid);
+          setRoom(response.room);
+          sessionStorage.setItem("room", response.room);
+        } else {
+          alert("Seems that you'll have to join another game. 😕");
+        }
+      }
+    );
 
-  const handleCellOnClick = (cellIndex: number) => {
-    if (!room) return;
-    const [i, j] = [Math.floor(cellIndex / 3), cellIndex % 3];
-
-    setGrid([...grid]);
-  };
-
-  const newGame = (newRoom: string) => {
-    let joined = true;
-    io.emit("new game", newRoom).on("room full", () => {
-      alert("Seems that you'll have to join another game. 😕");
-      joined = false;
+    io?.on("grid update", (grid: string[][]) => {
+      if (room) setGrid(grid);
     });
 
-    if (joined) {
-      setRoom(newRoom);
-      sessionStorage.setItem("room", newRoom);
+    io?.on("game end", (winner: string) => {
+      if (winner) {
+        alert(`${winner.toUpperCase()} won the game!`);
+        quitGame(false);
+      } else {
+        alert("Seems that we have a draw 🤔");
+      }
+    });
+
+    return () => {
+      io?.off("join response");
+      io?.off("grid update");
+      io?.off("game end");
+    };
+  }, [io, room]);
+
+  const handleCellOnClick = (cellIndex: number) => {
+    if (room) {
+      const [i, j] = [Math.floor(cellIndex / 3), cellIndex % 3];
+      io?.emit("place pawn", [i, j]);
     }
   };
 
-  const quitGame = () => {
-    if (confirm("Are you sure ?")) {
-      io.emit("quit game");
+  const newGame = (room: string) => {
+    io?.emit("join game", room);
+  };
+
+  const quitGame = (confirmation = true) => {
+    let proceed = true;
+    if (confirmation) proceed = confirm("Are you sure ?");
+    if (proceed) {
+      io?.emit("quit game");
       sessionStorage.removeItem("room");
       setRoom("");
       setGrid([
@@ -75,7 +102,7 @@ function App() {
           <Grid cells={grid} handleCellOnClick={handleCellOnClick} />
           {room ? (
             <div className="quit">
-              <StyledButton onClick={quitGame}>quit game</StyledButton>
+              <StyledButton onClick={() => quitGame()}>quit game</StyledButton>
             </div>
           ) : (
             <form
