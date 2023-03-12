@@ -112,6 +112,23 @@ io.on("connection", (socket) => {
     if (index >= 0) rooms = rooms.filter((room, i) => i !== index);
   });
 
+  socket.on("rematch", () => {
+    const room = rooms.find(
+      (room) => room.users.findIndex((user) => user.id === id) >= 0
+    );
+    if (room) {
+      if (isFull(room.grid) || getWinner(room.grid)) {
+        room.grid = [
+          ["", "", ""],
+          ["", "", ""],
+          ["", "", ""],
+        ];
+        room.hand = "o";
+        io.to(room.name).emit("grid update", room.grid);
+      }
+    }
+  });
+
   socket.on("place pawn", ([i, j]: number[]) => {
     for (let room of rooms) {
       const index = room.users.findIndex((user) => user.id === id);
@@ -126,15 +143,12 @@ io.on("connection", (socket) => {
 
         const user = room.users[index];
         if (user.pawn === room.hand && !room.grid[i][j]) {
-          room.grid[i][j] = room.hand;
-          room.hand = room.hand === "x" ? "o" : "x";
-          console.log(room);
+          if (!isFull(room.grid) && !getWinner(room.grid)) {
+            room.grid[i][j] = room.hand;
+            room.hand = room.hand === "x" ? "o" : "x";
+            io.to(room.name).emit("grid update", room.grid);
 
-          io.to(room.name).emit("grid update", room.grid);
-
-          const winner = getWinner(room.grid);
-          if (winner || isFull(room.grid)) {
-            io.to(room.name).emit("game end", winner);
+            console.log(room);
           }
         }
 

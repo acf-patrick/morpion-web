@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { GlobalStyles, StyledContainer } from "./styles";
 import { ThemeProvider } from "styled-components";
 import { Grid } from "./components";
 import { Socket, connect } from "socket.io-client";
 import { StyledButton } from "./styles";
 import theme from "./styles/theme";
+import { getWinner, isFull } from "./utils";
 
 function App() {
   // Socket.io connection handler
@@ -19,6 +20,22 @@ function App() {
     ["", "", ""],
     ["", "", ""],
   ]);
+
+  // Result of the game
+  const result = useMemo(() => {
+    const result = {
+      finished: false,
+      winner: "",
+    };
+
+    const winner = getWinner(grid);
+    if (winner) {
+      result.finished = true;
+      result.winner = winner;
+    } else if (isFull(grid)) result.finished = true;
+
+    return result;
+  }, [grid]);
 
   useEffect(() => {
     // Check for existing room
@@ -51,15 +68,6 @@ function App() {
       if (room) setGrid(grid);
     });
 
-    io?.on("game end", (winner: string) => {
-      if (winner) {
-        alert(`${winner.toUpperCase()} won the game!`);
-        quitGame(false);
-      } else {
-        alert("Seems that we have a draw 🤔");
-      }
-    });
-
     return () => {
       io?.off("join response");
       io?.off("grid update");
@@ -78,19 +86,19 @@ function App() {
     io?.emit("join game", room);
   };
 
-  const quitGame = (confirmation = true) => {
-    let proceed = true;
-    if (confirmation) proceed = confirm("Are you sure ?");
-    if (proceed) {
-      io?.emit("quit game");
-      sessionStorage.removeItem("room");
-      setRoom("");
-      setGrid([
-        ["", "", ""],
-        ["", "", ""],
-        ["", "", ""],
-      ]);
-    }
+  const quit = () => {
+    io?.emit("quit game");
+    sessionStorage.removeItem("room");
+    setRoom("");
+    setGrid([
+      ["", "", ""],
+      ["", "", ""],
+      ["", "", ""],
+    ]);
+  };
+
+  const quitGame = () => {
+    if (confirm("Are you sure ?")) quit();
   };
 
   return (
@@ -100,9 +108,25 @@ function App() {
         <div className="inner">
           <h1>tic tac toe</h1>
           <Grid cells={grid} handleCellOnClick={handleCellOnClick} />
+          {result.finished && (
+            <p>
+              {result.winner
+                ? `${result.winner.toUpperCase()} wins the game! 🎉`
+                : `Seems like we have a draw 🤔`}
+            </p>
+          )}
           {room ? (
-            <div className="quit">
-              <StyledButton onClick={() => quitGame()}>quit game</StyledButton>
+            <div className="buttons">
+              <StyledButton onClick={quitGame}>quit game</StyledButton>
+              {result.finished && (
+                <StyledButton
+                  onClick={() => {
+                    io?.emit("rematch");
+                  }}
+                >
+                  rematch
+                </StyledButton>
+              )}
             </div>
           ) : (
             <form

@@ -18,6 +18,10 @@ const StyledGrid = styled.div`
     height: 1.5rem;
   }
 
+  .highlight svg {
+    color: yellow;
+  }
+
   ._0 {
     border-bottom: ${({theme}) => theme.border} solid ${({ theme }) => theme.colors.line};
     border-right: ${({theme}) => theme.border} solid ${({ theme }) => theme.colors.line};

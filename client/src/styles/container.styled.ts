@@ -39,9 +39,10 @@ const StyledContainer = styled.div`
     background-color: ${({ theme }) => theme.colors.background};
   }
 
-  .quit {
+  .buttons {
     display: flex;
     justify-content: center;
+    gap: 1rem;
     margin-top: 2rem;
   }
 
@@ -52,6 +53,11 @@ const StyledContainer = styled.div`
     align-items: center;
     justify-content: center;
     padding: 1rem 0 0.5rem;
+  }
+
+  p {
+    text-align: center;
+    margin-top: 1rem;
   }
 
   input {
